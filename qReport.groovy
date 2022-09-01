@@ -42,7 +42,7 @@ td, th { vertical-align: top; border: 1px solid #c0c0c0; padding: 2px; }
 	display: none;
   }
 }
-</style></head><body><h1>Test Run Report</h1><p><small>Generated at %TIME%</small></p><table>
+</style></head><body><h1>Test Run Report</h1><p><small>Generated at %TIME% by <a href="https://github.com/lilopkins/SoapUI-qReport" target="_blank">qReport</a></small></p><table>
 <thead><tr><th>Test Case</th><th>Raw Request</th><th>Raw Response</th><th>Assertions</th></tr></thead><tbody>
 """
 def testTemplate = """<tr class="%ROW_STATUS%"><td><a href="#%IDNS%" name="%IDNS%">%ID%</a></td><td><button data-toggles="%IDNS%-req">View/Hide</button><pre id="%IDNS%-req" class="hidden"><code>%REQ%
@@ -102,6 +102,9 @@ file.splitEachLine(",") { line ->
       statusTxt = assertionsList.size() + " assertion/s:"
       assertionsList.each {
         statusTxt += "<br />$it.label &ndash; $it.status"
+        if (it.errors != null) {
+          statusTxt += "<br /> &rarr; $it.errors"
+        }
       }
     }
     
