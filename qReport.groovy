@@ -72,7 +72,7 @@ file.splitEachLine(",") { line ->
     log.info("Test case: " + caseId)
     def stepName = testRunner.testCase.getPropertyValue("_request_step")
     def step = testRunner.testCase.getTestStepByName(stepName)
-    def stepResult = testRunner.runTestStepByName(step.name)
+    def stepResult = testRunner.runTestStepByName(stepName)
     def rawReq = new String(stepResult.getRawRequestData())
     def rawRes = new String(stepResult.getRawResponseData())
     def status = stepResult.getStatus()

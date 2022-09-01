@@ -23,7 +23,9 @@ This assumes you already have a SoapUI project with endpoints configured.
 . On the Test Case itself, add the required properties, which are explained in more detail below.
 +
 image::readme_imgs/required_props.png[] 
-. Run the test case. An HTML report should be generated with details about the passes and fails in the test cases.
+. Run the Groovy script. An HTML report should be generated with details about the passes and fails in the test cases.
+
+IMPORTANT: Running the test case will result in a failure! You must run this from the script itself.
 
 === Setting Required Properties
 
