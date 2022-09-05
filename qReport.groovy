@@ -27,7 +27,7 @@ def groovyUtils = new com.eviware.soapui.support.GroovyUtils(context)
 def projectDir = new File(groovyUtils.projectPath)
 
 // HTML Templates
-def headTemplate = """<!doctype html><html><head><title>Test Run Output</title><style type="text/css">
+def headTemplate = """<!doctype html><html><head><meta charset="utf-8" /><title>Test Run Output</title><style type="text/css">
 body { font-family: sans-serif; font-weight: 300; }
 table { border-spacing: 0; border-collapse: collapse; }
 td, th { vertical-align: top; border: 1px solid #c0c0c0; padding: 2px; }
@@ -73,8 +73,8 @@ file.splitEachLine(",") { line ->
     def stepName = testRunner.testCase.getPropertyValue("_request_step")
     def step = testRunner.testCase.getTestStepByName(stepName)
     def stepResult = testRunner.runTestStepByName(stepName)
-    def rawReq = new String(stepResult.getRawRequestData())
-    def rawRes = new String(stepResult.getRawResponseData())
+    def rawReq = new String(stepResult.getRawRequestData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+    def rawRes = new String(stepResult.getRawResponseData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
     def status = stepResult.getStatus()
     def statusTxt = "---"
     def rowStatus = "discrepancy"
@@ -103,12 +103,12 @@ file.splitEachLine(",") { line ->
       assertionsList.each {
         statusTxt += "<br />$it.label &ndash; $it.status"
         if (it.errors != null) {
-          statusTxt += "<br /> &rarr; $it.errors"
+          statusTxt += "<br />" + (" &rarr; $it.errors".replaceAll("<", "&lt;").replaceAll(">", "&gt;"))
         }
       }
     }
     
-    report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", statusTxt).replaceAll("%ROW_STATUS%", rowStatus)
+    report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus)
   } else {
     line.each{ headers << it }
     headersPopulated = true
