@@ -77,7 +77,7 @@ file.splitEachLine(",") { line ->
     def rawRes = new String(stepResult.getRawResponseData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
     def status = stepResult.getStatus()
     def statusTxt = "---"
-    def rowStatus = "discrepancy"
+    def rowStatus = ""
     switch (status) {
       case TestStepStatus.OK:
         log.info(caseId + " passed!")
@@ -85,6 +85,7 @@ file.splitEachLine(",") { line ->
         break
       case TestStepStatus.FAILED:
         log.warn(caseId + " failed!")
+        rowStatus = "discrepancy"
         break
       case TestStepStatus.UNKNOWN:
         log.warn(caseId + " has no assertions!")
