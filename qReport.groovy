@@ -49,7 +49,7 @@ def testTemplate = """<tr class="%ROW_STATUS%"><td><a href="#%IDNS%" name="%IDNS
 </code></pre></td><td><button data-toggles="%IDNS%-res">View/Hide</button><pre id="%IDNS%-res" class="hidden"><code>%RES%
 </code></pre></td><td>%ASSERTION_STATUS%</td></tr>
 """
-def footTemplate = """</tbody></table><script type="text/javascript">
+def footTemplate = """</tbody></table><p>%PASS% tests passed, %FAIL% tests failed, out of %TOTAL% tests</p><script type="text/javascript">
 document.querySelectorAll("[data-toggles]").forEach(el => el.addEventListener("click", ev => document.getElementById(el.dataset["toggles"]).classList.toggle("hidden")))
 </script></body></html>
 """
@@ -61,6 +61,9 @@ def file = new File(projectDir, dataFile)
 def testRunTime = new Date()
 def reportFile = new File(projectDir, reportName + "-report-" + testRunTime.format("yyyy-MM-dd-HH-mm-ss") + ".html")
 def report = headTemplate.replaceAll("%TIME%", testRunTime.toString())
+def totalTests = 0
+def passedTests = 0
+def failedTests = 0
 
 log.info("Loading data from file: " + dataFile)
 file.eachLine { rawLine ->
@@ -105,10 +108,12 @@ file.eachLine { rawLine ->
       case TestStepStatus.OK:
         log.info(caseId + " passed!")
         rowStatus = "success"
+        passedTests += 1
         break
       case TestStepStatus.FAILED:
         log.warn(caseId + " failed!")
         rowStatus = "discrepancy"
+        failedTests += 1
         break
       case TestStepStatus.UNKNOWN:
         log.warn(caseId + " has no assertions!")
@@ -132,6 +137,7 @@ file.eachLine { rawLine ->
       }
     }
     
+    totalTests += 1
     report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus)
   } else {
     line.each{ headers << it }
@@ -139,7 +145,7 @@ file.eachLine { rawLine ->
   }
 }
 
-report += footTemplate
+report += footTemplate.replaceAll("%PASS%", passedTests.toString()).replaceAll("%FAIL%", failedTests.toString()).replaceAll("%TOTAL%", totalTests.toString())
 reportFile.withWriter { out ->
   out.println(report)
 }
