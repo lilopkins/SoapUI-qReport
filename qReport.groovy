@@ -89,6 +89,7 @@ file.eachLine { rawLine ->
       lastCharQuote = false
     }
   }
+  line << buffer
 
   if (headersPopulated) {
     line.eachWithIndex{ it, i -> testRunner.testCase.setPropertyValue(headers[i], it) }
