@@ -63,7 +63,30 @@ def reportFile = new File(projectDir, reportName + "-report-" + testRunTime.form
 def report = headTemplate.replaceAll("%TIME%", testRunTime.toString())
 
 log.info("Loading data from file: " + dataFile)
-file.splitEachLine(",") { line ->
+file.eachLine { rawLine ->
+  line = []
+  escaped = false
+  buffer = new String()
+  lastCharQuote = false
+  rawLine.each{ c ->
+    if (c == "\"") {
+      escaped = !escaped
+      if (lastCharQuote) {
+        buffer += "\""
+        lastCharQuote = false
+      } else {
+        lastCharQuote = true
+      }
+    } else if (c == "," && !escaped) {
+      line << buffer
+      buffer = new String()
+      lastCharQuote = false
+    } else {
+      buffer += c
+      lastCharQuote = false
+    }
+  }
+
   if (headersPopulated) {
     line.eachWithIndex{ it, i -> testRunner.testCase.setPropertyValue(headers[i], it) }
     
