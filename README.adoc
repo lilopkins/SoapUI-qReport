@@ -27,6 +27,8 @@ image::readme_imgs/required_props.png[]
 
 IMPORTANT: Running the test case will result in a failure! You must run this from the script itself.
 
+TIP: There is an optional property, _notes, to add notes to each test case that are visible on the output.
+
 === Setting Required Properties
 
 Only three properties are required:

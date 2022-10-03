@@ -43,11 +43,11 @@ td, th { vertical-align: top; border: 1px solid #c0c0c0; padding: 2px; }
   }
 }
 </style></head><body><h1>Test Run Report</h1><p><small>Generated at %TIME% by <a href="https://github.com/lilopkins/SoapUI-qReport" target="_blank">qReport</a></small></p><table>
-<thead><tr><th>Test Case</th><th>Raw Request</th><th>Raw Response</th><th>Assertions</th></tr></thead><tbody>
+<thead><tr><th>Test Case</th><th>Raw Request</th><th>Raw Response</th><th>Assertions</th><th>Notes</th></tr></thead><tbody>
 """
 def testTemplate = """<tr class="%ROW_STATUS%"><td><a href="#%IDNS%" name="%IDNS%">%ID%</a></td><td><button data-toggles="%IDNS%-req">View/Hide</button><pre id="%IDNS%-req" class="hidden"><code>%REQ%
 </code></pre></td><td><button data-toggles="%IDNS%-res">View/Hide</button><pre id="%IDNS%-res" class="hidden"><code>%RES%
-</code></pre></td><td>%ASSERTION_STATUS%</td></tr>
+</code></pre></td><td>%ASSERTION_STATUS%</td><td>%NOTES%</td></tr>
 """
 def footTemplate = """</tbody></table><p>%PASS% tests passed, %FAIL% tests failed, out of %TOTAL% tests</p><script type="text/javascript">
 document.querySelectorAll("[data-toggles]").forEach(el => el.addEventListener("click", ev => document.getElementById(el.dataset["toggles"]).classList.toggle("hidden")))
@@ -139,7 +139,7 @@ file.eachLine { rawLine ->
     }
     
     totalTests += 1
-    report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus)
+    report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus).replaceAll("%NOTES%", testRunner.testCase.getPropertyValue("_notes"))
   } else {
     line.each{ headers << it }
     headersPopulated = true
