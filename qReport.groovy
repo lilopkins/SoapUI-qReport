@@ -139,7 +139,9 @@ file.eachLine { rawLine ->
     }
     
     totalTests += 1
-    report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus).replaceAll("%NOTES%", testRunner.testCase.getPropertyValue("_notes"))
+    def notesRaw = testRunner.testCase.getPropertyValue("_notes")
+    def notes = notesRaw == null ? "" : notesRaw
+    report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus).replaceAll("%NOTES%", notes)
   } else {
     line.each{ headers << it }
     headersPopulated = true
