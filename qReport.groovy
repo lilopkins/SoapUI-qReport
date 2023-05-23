@@ -1,7 +1,7 @@
 /*
  *
  *  qReport - A Groovy script to run tests and generate reports in SoapUI
- *  Copyright (C) 2022 Lily Hopkins
+ *  Copyright (C) 2022-2023 Lily Hopkins
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,6 +54,40 @@ document.querySelectorAll("[data-toggles]").forEach(el => el.addEventListener("c
 </script></body></html>
 """
 
+def parseCSV(csvString) {
+  def rows = []
+  def inQuotes = false
+  def numQuotes = 0
+  def buffer = new StringBuilder()
+  def row = []
+
+  csvString.each { ch ->
+    if (ch == "\"") {
+      inQuotes = !inQuotes
+      numQuotes += 1
+      if (numQuotes == 2) {
+        numQuotes = 0
+        buffer.append(ch)
+      }
+    } else if (ch == "," && !inQuotes) {
+      numQuotes = 0
+      row.add(buffer.toString().trim())
+      buffer = new StringBuilder()
+    } else if (ch == "\n" && !inQuotes) {
+      numQuotes = 0
+      row.add(buffer.toString().trim())
+      buffer = new StringBuilder()
+      rows.add(row)
+      row = []
+    } else {
+      numQuotes = 0
+      buffer.append(ch)
+    }
+  }
+
+  return rows
+}
+
 // Runner variables
 def headers = []
 def headersPopulated = false
@@ -66,33 +100,12 @@ def passedTests = 0
 def failedTests = 0
 
 log.info("Loading data from file: " + dataFile)
-file.eachLine { rawLine ->
-  line = []
-  escaped = false
-  buffer = new String()
-  lastCharQuote = false
-  rawLine.each{ c ->
-    if (c == "\"") {
-      escaped = !escaped
-      if (lastCharQuote) {
-        buffer += "\""
-        lastCharQuote = false
-      } else {
-        lastCharQuote = true
-      }
-    } else if (c == "," && !escaped) {
-      line << buffer
-      buffer = new String()
-      lastCharQuote = false
-    } else {
-      buffer += c
-      lastCharQuote = false
-    }
-  }
-  line << buffer
+def parsedCsv = parseCSV(file.getText())
+log.info("parsedCsv = " + parsedCsv)
 
+parsedCsv.each { row ->
   if (headersPopulated) {
-    line.eachWithIndex{ it, i -> testRunner.testCase.setPropertyValue(headers[i], it) }
+    row.eachWithIndex{ it, i -> testRunner.testCase.setPropertyValue(headers[i], it) }
     
     def caseId = testRunner.testCase.getPropertyValue("ID")
     def caseIdNoSpaces = caseId.replaceAll(" ", "_")
@@ -143,7 +156,7 @@ file.eachLine { rawLine ->
     def notes = notesRaw == null ? "" : notesRaw
     report += testTemplate.replaceAll("%ID%", caseId).replaceAll("%IDNS%", caseIdNoSpaces).replaceAll("%REQ%", rawReq).replaceAll("%RES%", rawRes).replaceAll("%ASSERTION_STATUS%", java.util.regex.Matcher.quoteReplacement(statusTxt)).replaceAll("%ROW_STATUS%", rowStatus).replaceAll("%NOTES%", notes)
   } else {
-    line.each{ headers << it }
+    row.each{ headers << it }
     headersPopulated = true
   }
 }
