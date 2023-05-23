@@ -116,8 +116,8 @@ parsedCsv.each { row ->
     def rawReq = "Request failed."
     def rawRes = "Request failed."
     def statusTxt = "---"
-    if (stepResult == null) {
-        log.warn(caseId + " failed!")
+    if (stepResult.response == null) {
+        log.warn(caseId + " failed (request didn't respond with content)!")
         rowStatus = "discrepancy"
         statusTxt = "Request failed."
         failedTests += 1
