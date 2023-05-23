@@ -101,7 +101,6 @@ def failedTests = 0
 
 log.info("Loading data from file: " + dataFile)
 def parsedCsv = parseCSV(file.getText())
-log.info("parsedCsv = " + parsedCsv)
 
 parsedCsv.each { row ->
   if (headersPopulated) {
