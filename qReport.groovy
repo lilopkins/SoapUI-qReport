@@ -108,44 +108,53 @@ parsedCsv.each { row ->
     
     def caseId = testRunner.testCase.getPropertyValue("ID")
     def caseIdNoSpaces = caseId.replaceAll(" ", "_")
+    def rowStatus = ""
     log.info("Test case: " + caseId)
     def stepName = testRunner.testCase.getPropertyValue("_request_step")
     def step = testRunner.testCase.getTestStepByName(stepName)
     def stepResult = testRunner.runTestStepByName(stepName)
-    def rawReq = new String(stepResult.getRawRequestData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-    def rawRes = new String(stepResult.getRawResponseData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-    def status = stepResult.getStatus()
+    def rawReq = "Request failed."
+    def rawRes = "Request failed."
     def statusTxt = "---"
-    def rowStatus = ""
-    switch (status) {
-      case TestStepStatus.OK:
-        log.info(caseId + " passed!")
-        rowStatus = "success"
-        passedTests += 1
-        break
-      case TestStepStatus.FAILED:
+    if (stepResult == null) {
         log.warn(caseId + " failed!")
         rowStatus = "discrepancy"
+        statusTxt = "Request failed."
         failedTests += 1
-        break
-      case TestStepStatus.UNKNOWN:
-        log.warn(caseId + " has no assertions!")
-        statusTxt = "No assertions!"
-        break
-      case TestStepStatus.CANCELLED:
-        def cancelled = false
-        assert cancelled
-        break
-    }
+    } else {
+      rawReq = new String(stepResult.getRawRequestData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+      rawRes = new String(stepResult.getRawResponseData()).replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+      def status = stepResult.getStatus()
+      switch (status) {
+        case TestStepStatus.OK:
+          log.info(caseId + " passed!")
+          rowStatus = "success"
+          passedTests += 1
+          break
+        case TestStepStatus.FAILED:
+          log.warn(caseId + " failed!")
+          rowStatus = "discrepancy"
+          failedTests += 1
+          break
+        case TestStepStatus.UNKNOWN:
+          log.warn(caseId + " has no assertions!")
+          statusTxt = "No assertions!"
+          break
+        case TestStepStatus.CANCELLED:
+          def cancelled = false
+          assert cancelled
+          break
+      }
 
-    // Get assertion data
-    if (step.metaClass.respondsTo(step, "getAssertionList")) {
-      def assertionsList = step.getAssertionList()
-      statusTxt = assertionsList.size() + " assertion/s:"
-      assertionsList.each {
-        statusTxt += "<br />$it.label &ndash; $it.status"
-        if (it.errors != null) {
-          statusTxt += "<br />" + (" &rarr; $it.errors".replaceAll("<", "&lt;").replaceAll(">", "&gt;"))
+      // Get assertion data
+      if (step.metaClass.respondsTo(step, "getAssertionList")) {
+        def assertionsList = step.getAssertionList()
+        statusTxt = assertionsList.size() + " assertion/s:"
+        assertionsList.each {
+          statusTxt += "<br />$it.label &ndash; $it.status"
+          if (it.errors != null) {
+            statusTxt += "<br />" + (" &rarr; $it.errors".replaceAll("<", "&lt;").replaceAll(">", "&gt;"))
+          }
         }
       }
     }
